@@ -10,6 +10,8 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,11 +30,12 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 public class ComposeTweetActivity extends Activity {
 
 	private static final String TAG = "ComposeTweet";
+	private static final int MAX_COUNT = 140;
 	TextView user_name;
 	TextView user_id;
 	ImageView img_url;
 	EditText status;
-	//MenuItem mi_charsLeft;
+	MenuItem mi_charsLeft;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -46,33 +49,34 @@ public class ComposeTweetActivity extends Activity {
 		user_id = (TextView) findViewById(R.id.tv_myid);
 		img_url = (ImageView) findViewById(R.id.iv_myimage);
 		status = (EditText) findViewById(R.id.et_tweetMessage);
-		
-		//mi_charsLeft = (MenuItem) findViewById(R.id.mi_charsLeft);
 
 		user_name.setText(((User) user).getUser_name());
 		user_id.setText("@" +((User) user).getUser_id());
 		ImageLoader.getInstance().displayImage(((User)user).getMy_image_url(), img_url);
-		
-//		status.addTextChangedListener(new TextWatcher() {
-//			
-//			@Override
-//			public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
-//				
-//			}
-//			
-//			@Override
-//			public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,
-//					int arg3) {
-//				Log.d(TAG, arg0.toString());
-//			}
-//			
-//			@Override
-//			public void afterTextChanged(Editable arg0) {
-//				//mi_charsLeft = (MenuItem) findViewById(R.id.mi_charsLeft);
-//				int left = 140 - status.getText().toString().length();
-//				mi_charsLeft.setTitle(left+"");
-//			}
-//		});
+
+		status.addTextChangedListener(new TextWatcher() {
+
+			@Override
+			public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
+
+			}
+
+			@Override
+			public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,
+					int arg3) {
+				Log.d(TAG, arg0.toString());
+			}
+
+			@Override
+			public void afterTextChanged(Editable arg0) {
+				//mi_charsLeft = (MenuItem) findViewById(R.id.mi_charsLeft);
+				int left = MAX_COUNT - status.getText().toString().length();
+				if (left >=0 )
+					mi_charsLeft.setTitle(left+"");
+				else 
+					Toast.makeText(getApplicationContext(), "Max 140 chars allowed", Toast.LENGTH_SHORT).show();
+			}
+		});
 
 	}
 
@@ -80,6 +84,8 @@ public class ComposeTweetActivity extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.compose_tweet, menu);
+		mi_charsLeft= (MenuItem) menu.findItem(R.id.mi_charsLeft);
+
 		return true;
 	}
 
@@ -126,7 +132,7 @@ public class ComposeTweetActivity extends Activity {
 					setResult(RESULT_OK, goBack_intent);
 					finish();
 				}
-				
+
 				@Override
 				public void onSuccess(JSONObject arg0) {
 					Log.d(TAG, "SUCCESS 2: " + arg0.toString());

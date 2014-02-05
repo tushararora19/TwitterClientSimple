@@ -14,10 +14,10 @@
         android:title="@string/cancel"
         android:onClick="CancelTweet"/>
     
-    <!-- item
+    <item
         android:id="@+id/mi_charsLeft"
         android:orderInCategory="100"
         android:showAsAction="always"
-        android:title="@string/charsLeft" />  -->
+        android:title="@string/charsLeft" />
     
 </menu>
