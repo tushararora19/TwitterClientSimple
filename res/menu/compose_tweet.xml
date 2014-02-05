@@ -1,0 +1,23 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/tweet"
+        android:orderInCategory="110"
+        android:showAsAction="always"
+        android:title="@string/tweet"
+        android:onClick="TweetMessage"/>
+
+    <item
+        android:id="@+id/cancel"
+        android:orderInCategory="120"
+        android:showAsAction="always"
+        android:title="@string/cancel"
+        android:onClick="CancelTweet"/>
+    
+    <!-- item
+        android:id="@+id/mi_charsLeft"
+        android:orderInCategory="100"
+        android:showAsAction="always"
+        android:title="@string/charsLeft" />  -->
+    
+</menu>
