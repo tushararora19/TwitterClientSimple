@@ -151,7 +151,6 @@ public class Tweet extends Model{
 					Model old = new Select().from(Tweet.class).where("row_id = ?", row+1).executeSingle();
 					old.delete();
 				} catch (NullPointerException ne) {
-					Log.d(TAG, "no old element found");
 				} catch (Exception e) {
 					Log.d(TAG, "no old element found with exc: " +e.toString());
 				}

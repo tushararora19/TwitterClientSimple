@@ -192,21 +192,25 @@ public class TimelineActivity extends Activity {
 	}
 
 	public void composeNewTweet(MenuItem mi_compose){
-		TwitterClientapp.getRestClient().getUserTimeline(new JsonHttpResponseHandler() {
+		if (isNetworkAvailable()){
+			TwitterClientapp.getRestClient().getUserTimeline(new JsonHttpResponseHandler() {
 
-			@Override
-			public void onFailure(Throwable arg0, JSONArray user) {
-				Log.d(TAG, "Failed : " + user.toString());
-			}
+				@Override
+				public void onFailure(Throwable arg0, JSONArray user) {
+					Log.d(TAG, "Failed : " + user.toString());
+				}
 
-			@Override
-			public void onSuccess(JSONArray user) {
-				Log.d(TAG, "Success : " + user.toString()); 
-				myself = User.parseJsonUserResult(user);
-				//user_adap = new UserAdapter(getApplicationContext(), myself);
-				startIntent();
-			}
-		});
+				@Override
+				public void onSuccess(JSONArray user) {
+					Log.d(TAG, "Success : " + user.toString()); 
+					myself = User.parseJsonUserResult(user);
+					//user_adap = new UserAdapter(getApplicationContext(), myself);
+					startIntent();
+				}
+			});
+		} else {
+			Toast.makeText(getApplicationContext(), "No Internet Connection..", Toast.LENGTH_SHORT).show();
+		}
 	}
 
 	private void startIntent(){
@@ -214,7 +218,7 @@ public class TimelineActivity extends Activity {
 		compose_intent.putExtra("userData", myself.get(0));
 		startActivityForResult(compose_intent, REQ_CODE);
 	}
-	
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
