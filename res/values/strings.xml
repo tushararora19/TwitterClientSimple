@@ -22,5 +22,6 @@
     <string name="hint_retweeted"> retweeted</string>
     <string name="tweet">Tweet</string>
     <string name="charsLeft">140</string>
+    <string name="title_activity_user_profile">UserProfileActivity</string>
 
 </resources>

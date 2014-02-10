@@ -23,10 +23,6 @@ import android.widget.Toast;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
-/*
- * To do:
- * 1. User can see a counter with total number of characters left for tweet
- */
 public class ComposeTweetActivity extends Activity {
 
 	private static final String TAG = "ComposeTweet";
@@ -129,6 +125,7 @@ public class ComposeTweetActivity extends Activity {
 				public void onSuccess(JSONArray arg0) {
 					Log.d(TAG, "SUCCESS: " + arg0.toString());
 					Intent goBack_intent = new Intent (getApplicationContext(), TimelineActivity.class);
+					goBack_intent.putExtra("demo", "demoString");
 					setResult(RESULT_OK, goBack_intent);
 					finish();
 				}

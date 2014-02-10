@@ -21,9 +21,15 @@ public class TweetAdapter extends ArrayAdapter<Tweet> {
 
 	public static final long MINUTE_IN_MILLIS = 60000;
 	public static final long WEEK_IN_MILLIS = 604800000;
+	private static final String TAG = "TweetAdapter";
 
 	public TweetAdapter(Context context, ArrayList<Tweet> items) {
 		super(context, R.layout.tweet_item, items);
+	}
+	
+	@Override
+	public int getCount() {
+		return super.getCount();
 	}
 
 	@Override

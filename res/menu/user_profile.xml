@@ -1,0 +1,11 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/mi_gobk"
+        android:orderInCategory="100"
+        android:showAsAction="always" 
+        android:icon="@drawable/ic_goback"
+        android:title="GoBack"
+        android:onClick="GoBackToTimeline"
+        />
+</menu>

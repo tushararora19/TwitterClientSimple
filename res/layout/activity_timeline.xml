@@ -8,14 +8,15 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".TimelineActivity" >
 
-    <eu.erikw.PullToRefreshListView
-        android:id="@+id/lv_tweets"
-        android:layout_width="match_parent"
+    <FrameLayout
+        android:id="@+id/fl_container"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        style="@style/ptr_spinner"
-         >
-    </eu.erikw.PullToRefreshListView>
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true" >
+
+    </FrameLayout>
 
 </RelativeLayout>

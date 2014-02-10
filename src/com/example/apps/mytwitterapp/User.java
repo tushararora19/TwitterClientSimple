@@ -19,14 +19,18 @@ public class User extends Model implements Serializable{
 	 */
 	private static final long serialVersionUID = -736827265126122900L;
 	@Column(name="user_screen_id", unique = true, onUniqueConflict = Column.ConflictAction.REPLACE)
-	String user_screen_id;
+	static String user_screen_id;
 	
 	@Column(name="username")
-	String user_name;
+	static String user_name;
 	
 	@Column(name="user_img_url")
-	String my_image_url;
+	static String my_image_url;
 
+	static int followers_count = 0;
+	static int following_count = 0;
+	static int no_tweets = 0;
+	
 	public User () {
 
 	}
@@ -37,10 +41,10 @@ public class User extends Model implements Serializable{
 		my_image_url = url;
 	}
 
-	public String getUser_id() {
+	public static String getUser_id() {
 		return user_screen_id;
 	}
-	public String getUser_name() {
+	public static String getUser_name() {
 		return user_name;
 	}
 	public String getMy_image_url() {
@@ -68,6 +72,37 @@ public class User extends Model implements Serializable{
 
 		}
 		return users;
+	}
+	
+	public static void parseUser (JSONObject userob){
+		
+		 try {
+			followers_count = Integer.parseInt(userob.getString("followers_count"));
+			following_count = Integer.parseInt(userob.getString("friends_count"));
+			no_tweets = Integer.parseInt(userob.getString("statuses_count"));
+			
+			user_name = userob.getString("name");
+			user_screen_id = userob.getString("screen_name");
+			my_image_url = userob.getString("profile_image_url");
+			
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public static int getFollowers_count() {
+		return followers_count;
+	}
+
+	public static int getFollowing_count() {
+		return following_count;
+	}
+
+	public static int getNo_tweets() {
+		return no_tweets;
 	}
 
 }

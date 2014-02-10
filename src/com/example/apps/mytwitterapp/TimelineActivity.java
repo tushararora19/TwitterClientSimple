@@ -4,186 +4,74 @@ import java.util.ArrayList;
 
 import org.json.JSONArray;
 
-import android.app.Activity;
-import android.content.Context;
+import android.app.ActionBar;
+import android.app.ActionBar.Tab;
+import android.app.ActionBar.TabListener;
+import android.app.FragmentTransaction;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.example.apps.mytwitterapp.fragments.BaseFragment;
+import com.example.apps.mytwitterapp.fragments.HomeTimeLineFragment;
+import com.example.apps.mytwitterapp.fragments.MentionsTimeLineFragment;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
-import eu.erikw.PullToRefreshListView.OnRefreshListener;
+/*
+ * IMPORTANT
+ *  Endless scrolling should load more tweets from the point where last one ended: Do NOT construct adapter (tweet_adapter) again at all. 
+ *  Adapter maintains its own state; therefore, if u do new Adapter, it will lose its own state 
+ * tweet_results.addAll(...)
+ * tweet_adap.notifyDataSetChanged();
+ * 
+ * Also don't keep adding lv.setAdapter (not required everytime)
+ * or directly tweet_adap.addAll(Tweet.parseJsonArray(tweets))
+ * 
+ */
 
 /*
- * To do:
- * 1. add timestamp (relative time) DONE
- * 2. User can load more tweets once they reach the bottom of the list Using "Load More" Button or "Lazy Endless" Scrolling without duplicates DONE
- * 3. Endless scrolling should load more tweets from the point where last one ended TO DO
- * 4. User can refresh timeline by pulling down (i.e pull-to-refresh) without duplicates DONE (check where to put the newly fed tweet: should be at start of array)
- * 5. User can open the twitter app offline and see recent tweets. Tweets are persisted into sqlite and displayed from the local DB DONE
+ * TO DO:
+ * 1. Make user timeline also flexible enough to scroll and refresh.
+ * 2. Add option for user to tweet from his timeline
+ * 3. Clicking on any tweet should take to that user timeline
+Optional: When a network request goes out, user sees an indeterminate progress indicator
+Optional: User can "reply" to any tweet on their home timeline
+The user that wrote the original tweet is automatically "@" replied in compose
+Optional: User can click on a tweet to be taken to a "detail view" of that tweet
+Optional: User can take favorite (and unfavorite) or reweet actions on a tweet
+Optional: User can search for tweets matching a particular query and see results
+Optional: User can view their direct messages (or send new ones)
  */
-public class TimelineActivity extends Activity {
 
-	eu.erikw.PullToRefreshListView lv_tweetTimeline;
-	ArrayList<Tweet> tweet_results;
-	TweetAdapter tweet_adap;
+public class TimelineActivity extends FragmentActivity implements TabListener{
+
 	ArrayList<User> myself;
 	private static final int REQ_CODE = 10;
-
+	private static final int REQ_CODE_2 = 20;
 	private static final String TAG = "TimelineActivity";
+	android.support.v4.app.FragmentManager manager;
+	HomeTimeLineFragment home_frag = new HomeTimeLineFragment();
+	MentionsTimeLineFragment mention_frag = new MentionsTimeLineFragment();
+	ActionBar action_bar;
+	Tab home_tab, mentions_tab;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_timeline);
-
-		lv_tweetTimeline = (eu.erikw.PullToRefreshListView) findViewById(R.id.lv_tweets);
-		tweet_results = new ArrayList<Tweet>();
-
-		// add condition if its in offline mode or online mode
-		if (isNetworkAvailable())
-			fetchTimelineData();
-		else 
-			fetchOfflineTimelineData();
-
-		if (isNetworkAvailable()) {
-			lv_tweetTimeline.setOnRefreshListener(new OnRefreshListener() {
-
-				@Override
-				public void onRefresh() {
-					Log.d(TAG, "Refreshing tweets");
-					fetchRefreshTimelineData();
-					lv_tweetTimeline.onRefreshComplete();
-				}
-			});
+		if (savedInstanceState == null ){
+			manager = getSupportFragmentManager();
 
 		}
-		else {
-			Toast.makeText(getApplicationContext(), "No Internet Connection..No Refresh", Toast.LENGTH_SHORT).show();
-		}
-	}
-
-	private boolean isNetworkAvailable() {
-		ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-		NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-		return activeNetworkInfo != null && activeNetworkInfo.isConnected();
-	}
-
-	@Override
-	public void onWindowFocusChanged(boolean hasFocus) {
-		super.onWindowFocusChanged(hasFocus);
-		if (hasFocus){
-			setupEndlessScrolling();
-		}
-	}
-
-	private void setupEndlessScrolling() {
-		lv_tweetTimeline.setOnScrollListener(new EndlessScrollListener(0){
-
-			@Override
-			public void onLoadMore(int page, int totalItemsCount) {
-				// Triggered only when new data needs to be appended to the list
-				// Add whatever code is needed to append new items to your AdapterView
-				Log.d(TAG, "current page: " + page + " total item count= " + totalItemsCount);
-				customLoadMoreDataFromApi(page); 
-				// or customLoadMoreDataFromApi(totalItemsCount);
-			}
-
-		});
-	}
-
-	public void customLoadMoreDataFromApi(int offset) {
-		// This method probably sends out a network request and appends new data items to your adapter. 
-		// Use the offset value and add it as a parameter to your API request to retrieve paginated data.
-		// Deserialize API response and then construct new objects to append to the adapter		
-		// Log.d(TAG, "current offset: " + offset);
-		if (isNetworkAvailable()) {
-			Toast.makeText(getApplicationContext(), "Loading More..", Toast.LENGTH_SHORT).show();
-			fetchMoreTimelineData();
-		}
-		else {
-			Toast.makeText(getApplicationContext(), "No Internet Connection..", Toast.LENGTH_SHORT).show();
-		}
-	}
-
-	private void fetchMoreTimelineData(){
-		TwitterClientapp.getRestClient().getHomeMoreTimeline(new JsonHttpResponseHandler(){
-
-			@Override
-			public void onFailure(Throwable arg0, JSONArray arg1) {
-				Log.d(TAG, "Failed fetching");
-			}
-
-			@Override
-			public void onSuccess(JSONArray tweets) {
-				Log.d(TAG, "Successfully fetched MORE: " + tweets.toString());
-				tweet_results.addAll(Tweet.parseJsonArray(tweets));
-				tweet_adap = new TweetAdapter(getApplicationContext(), tweet_results);
-				//Log.d(TAG, "TwitterAdapter: " +tweet_adap.getCount() + " --> " +tweet_adap.toString());
-				lv_tweetTimeline.setAdapter(tweet_adap);
-			}
-		} );
-		//List<Model> t = Tweet.getRandom();
-		//Log.d(TAG, "Random Tweet text:" + t.toString());
-	}
-
-	private void fetchRefreshTimelineData(){
-		TwitterClientapp.getRestClient().getHomeRefreshTimeline(new JsonHttpResponseHandler(){
-
-			@Override
-			public void onFailure(Throwable arg0, JSONArray arg1) {
-				Log.d(TAG, "Failed fetching");
-			}
-
-			@Override
-			public void onSuccess(JSONArray tweets) {
-				if (tweets.length() > 0) {
-					Log.d(TAG, "Successfully fetched REFRESH: " + tweets.toString());
-					tweet_results.addAll(0, Tweet.parseJsonArray(tweets));
-					tweet_adap = new TweetAdapter(getApplicationContext(), tweet_results);
-					//Log.d(TAG, "TwitterAdapter: " +tweet_adap.getCount() + " --> " +tweet_adap.toString());
-					lv_tweetTimeline.setAdapter(tweet_adap);
-				} 
-				//tweet_adap.notifyDataSetChanged();
-			}
-		});
-		//List<Model> t = Tweet.getRandom();
-		//Log.d(TAG, "Random Tweet text:" + t.toString());
-	}
-
-	private void fetchTimelineData(){
-		TwitterClientapp.getRestClient().getHomeTimeline(new JsonHttpResponseHandler(){
-
-			@Override
-			public void onFailure(Throwable arg0, JSONArray arg1) {
-				Log.d(TAG, "Failed fetching");
-			}
-
-			@Override
-			public void onSuccess(JSONArray tweets) {
-				Log.d(TAG, "Successfully fetched: " + tweets.toString());
-				tweet_results.addAll(Tweet.parseJsonArray(tweets));
-				tweet_adap = new TweetAdapter(getApplicationContext(), tweet_results);
-				//Log.d(TAG, "TwitterAdapter: " +tweet_adap.getCount() + " --> " +tweet_adap.toString());
-				lv_tweetTimeline.setAdapter(tweet_adap);
-			}
-		});
-		//List<Model> t = Tweet.getRandom();
-		//Log.d(TAG, "Random Tweet text:" + t.toString());
-	}
-
-	private void fetchOfflineTimelineData(){
-
-		ArrayList<Tweet> tweet_offlineData = (ArrayList<Tweet>) Tweet.offlineFromJson();
-		tweet_adap = new TweetAdapter(getApplicationContext(), tweet_offlineData);
-		lv_tweetTimeline.setAdapter(tweet_adap);
+		setupNavigation();
 
 	}
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -191,8 +79,34 @@ public class TimelineActivity extends Activity {
 		return true;
 	}
 
+	public void setupNavigationSlider() {
+		ActionBar action_bar = getActionBar();
+		action_bar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+
+		ArrayList<Fragment> frags = new ArrayList<Fragment>();
+		frags.add(home_frag);
+		frags.add(mention_frag);
+		PagerAdapter pg_adap = new PagerAdapter(super.getSupportFragmentManager(), frags);
+
+		//ViewPager pager = (ViewPager) findViewById(R.id.vp_container);
+		//pager.setAdapter(pg_adap);
+	}
+
+	public void setupNavigation() { 
+		action_bar = getActionBar();
+
+		action_bar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+
+		home_tab = action_bar.newTab().setText("Home").setTag("HomeTimeLine").setTabListener(this);
+		mentions_tab = action_bar.newTab().setText("Mentions").setTag("MentionTimeLine").setTabListener(this);
+
+		action_bar.addTab(home_tab);
+		action_bar.addTab(mentions_tab);
+		action_bar.selectTab(home_tab);
+
+	}
 	public void composeNewTweet(MenuItem mi_compose){
-		if (isNetworkAvailable()){
+		if (BaseFragment.isNetworkAvailable(getApplicationContext())){
 			TwitterClientapp.getRestClient().getUserTimeline(new JsonHttpResponseHandler() {
 
 				@Override
@@ -222,9 +136,87 @@ public class TimelineActivity extends Activity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
+		
+		android.support.v4.app.FragmentTransaction trans = manager.beginTransaction();
 
+		// this is for compose activity result
 		if (requestCode == REQ_CODE && resultCode == RESULT_OK){
-			fetchRefreshTimelineData();
+			
+			if (!mention_frag.isDetached())
+				trans.detach(mention_frag);
+			
+			if (!home_frag.isDetached())
+				trans.detach(home_frag);
+			
+			action_bar.selectTab(home_tab);
+			
+			trans.attach(home_frag);
+			trans.replace(R.id.fl_container, home_frag);
+			
+		}  // this is for user go back 
+		else if (requestCode == REQ_CODE_2 && resultCode == RESULT_OK) {
+			
+			if (!mention_frag.isDetached())
+				trans.detach(mention_frag);
+			
+			if (!home_frag.isDetached())
+				trans.detach(home_frag);
+			action_bar.selectTab(home_tab);
+			
+			trans.attach(home_frag);
+			trans.replace(R.id.fl_container, home_frag);
+		}
+		trans.commit();
+	}
+
+	@Override
+	public void onTabReselected(Tab tab, FragmentTransaction ft) {
+
+	}
+
+	@Override
+	public void onTabSelected(Tab tab, FragmentTransaction ft) {
+
+		android.support.v4.app.FragmentTransaction trans = manager.beginTransaction();
+
+		if (tab.getTag().equals("HomeTimeLine")){
+			trans.attach(home_frag);
+			trans.replace(R.id.fl_container, home_frag);
+		} else {
+			trans.attach(mention_frag);
+			trans.replace(R.id.fl_container, mention_frag);
+		}
+		trans.commit();
+	}
+
+	@Override
+	public void onTabUnselected(Tab tab, FragmentTransaction ft) {
+		android.support.v4.app.FragmentTransaction trans = manager.beginTransaction();
+
+		if (tab.getTag().equals("HomeTimeLine")){
+			trans.detach(home_frag);
+		} else {
+			trans.detach(mention_frag);
+		}
+		trans.commit();
+	}
+
+	public void goToUserPage(MenuItem mi_userProfile) {
+		if (BaseFragment.isNetworkAvailable(getApplicationContext())){
+			TwitterClientapp.getRestClient().getUserTimeline(new JsonHttpResponseHandler() {
+				@Override
+				public void onFailure(Throwable arg0, JSONArray user) {
+					Log.d(TAG, "Failed : " + user.toString());
+				}
+				@Override
+				public void onSuccess(JSONArray user) {
+					Log.d(TAG, "Success : " + user.toString()); 
+					myself = User.parseJsonUserResult(user);
+					Intent user_intent = new Intent(getApplicationContext(), UserProfileActivity.class);
+					user_intent.putExtra("userData", myself.get(0));
+					startActivityForResult(user_intent, REQ_CODE_2);;				
+				}
+			});
 		}
 	}
 }

@@ -39,14 +39,14 @@ public class TwitterClient extends OAuthBaseClient {
     	client.get(url, handler);
     }
     
-    public void getHomeMoreTimeline(AsyncHttpResponseHandler handler){
-    	String url = getApiUrl("statuses/home_timeline.json") +"?count=10&max_id="+(Long.parseLong(Tweet.max_id) -1); // subtract -1 here from max_id (since its inclusive)
+    public void getHomeMoreTimeline(AsyncHttpResponseHandler handler, String max_id){
+    	String url = getApiUrl("statuses/home_timeline.json") +"?count=10&max_id="+(Long.parseLong(Tweet.base_frag_home.max_id) -1); // subtract -1 here from max_id (since its inclusive)
     	client.get(url, handler);
     }
     
-    public void getHomeRefreshTimeline(AsyncHttpResponseHandler handler){
+    public void getHomeRefreshTimeline(AsyncHttpResponseHandler handler, String since_id){
     	// subtract -1 here from max_id (since its inclusive). since_id is not inclusive, so don't need to subtract -1
-    	String url = getApiUrl("statuses/home_timeline.json") +"?count=5&since_id="+Tweet.since_id;		
+    	String url = getApiUrl("statuses/home_timeline.json") +"?count=5&since_id="+Tweet.base_frag_home.since_id;		
     	client.get(url, handler);
     }
     
@@ -59,6 +59,28 @@ public class TwitterClient extends OAuthBaseClient {
     	String url = getApiUrl("statuses/update.json");
     	url += "?status=" + Uri.encode(status);
     	client.post(url, handler);
+    }
+    
+    public void getMentions(AsyncHttpResponseHandler handler) { 
+    	String url = getApiUrl("statuses/mentions_timeline.json");
+    	url += "?count=15";
+    	client.get(url, handler);
+    }
+    
+    public void getMentionsRefreshTimeline(AsyncHttpResponseHandler handler, String since_id){
+    	// subtract -1 here from max_id (since its inclusive). since_id is not inclusive, so don't need to subtract -1
+    	String url = getApiUrl("statuses/mentions_timeline.json") +"?count=5&since_id="+Tweet.base_frag_mention.since_id;		
+    	client.get(url, handler);
+    }
+    
+    public void getMentionsMoreTimeline(AsyncHttpResponseHandler handler, String max_id){
+    	String url = getApiUrl("statuses/mentions_timeline.json") +"?count=10&max_id="+(Long.parseLong(Tweet.base_frag_mention.max_id) -1); // need to modify this to allow max_id
+    	client.get(url, handler);
+    }
+    
+    public void getUserInfo(AsyncHttpResponseHandler handler){
+    	String url = getApiUrl("users/show.json?screen_name="+ User.getUser_id());
+    	client.get(url, handler);
     }
     
     // CHANGE THIS
