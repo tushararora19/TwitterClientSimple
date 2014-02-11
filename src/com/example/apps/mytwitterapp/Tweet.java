@@ -1,6 +1,7 @@
 package com.example.apps.mytwitterapp;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -16,6 +17,7 @@ import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Select;
 import com.example.apps.mytwitterapp.fragments.BaseFragment;
 import com.example.apps.mytwitterapp.fragments.HomeTimeLineFragment;
+import com.example.apps.mytwitterapp.fragments.MentionsTimeLineFragment;
 
 @Table(name="Tweets")
 public class Tweet extends Model{
@@ -24,7 +26,9 @@ public class Tweet extends Model{
 	private static final String TAG = "Tweet";
 	public static BaseFragment base_frag_home = null;
 	public static BaseFragment base_frag_mention = null;
-	
+	public static BaseFragment base_frag_user = null;
+//	static Hashtable<String, String> img_name = new Hashtable<String, String>();
+
 	@Column(name="row_id", unique = true, onUniqueConflict = Column.ConflictAction.REPLACE)
 	static int row = 0;
 	
@@ -86,13 +90,9 @@ public class Tweet extends Model{
 	public String getTimeCreated() {
 		return time_created;
 	}
-
 	public static ArrayList<Tweet> parseJsonArray (JSONArray tweets, BaseFragment base){
 		ArrayList<Tweet> tweet_results = new ArrayList<Tweet>();
-		if (base instanceof HomeTimeLineFragment) 
-			base_frag_home = base;
-		else 
-			base_frag_mention = base;
+		
 		// using bulk inserts
 		ActiveAndroid.beginTransaction();
 		try {
@@ -144,7 +144,7 @@ public class Tweet extends Model{
 				if (base.since_id.equals("")){
 					base.since_id = tweet_id;
 				} else {
-					if (tweet_id.compareToIgnoreCase(base.since_id) > 0){
+					if (tweet_id.compareToIgnoreCase(base.since_id) >= 0){
 						base.since_id = tweet_id;
 					}
 				}
@@ -165,11 +165,20 @@ public class Tweet extends Model{
 				t.save();
 				tweet_results.add(t);
 			}
+			
+			if (base instanceof HomeTimeLineFragment) 
+				base_frag_home = base;
+			else if (base instanceof MentionsTimeLineFragment)
+				base_frag_mention = base;
+			else 
+				base_frag_user = base;
+			
 			ActiveAndroid.setTransactionSuccessful();
 
 		} catch (Exception e) {
 		} finally {
 			ActiveAndroid.endTransaction();
+			
 		}
 		return tweet_results;
 	}

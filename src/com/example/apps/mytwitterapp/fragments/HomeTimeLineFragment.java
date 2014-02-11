@@ -18,13 +18,21 @@ import eu.erikw.PullToRefreshListView.OnRefreshListener;
 public class HomeTimeLineFragment extends BaseFragment {
 
 	BaseFragment base_frag_home;
-	public static String max_id = "" ; 
-	public static String since_id = "";
 	private static boolean initial_call_done = false;
 
 	public HomeTimeLineFragment(){ 
 		super();
 	}
+	
+	public static HomeTimeLineFragment newInstance(int page, String title) {
+		HomeTimeLineFragment fragmentFirst = new HomeTimeLineFragment();
+		Bundle args = new Bundle();
+		args.putInt("pgNo", page);
+		args.putString("Home", title);
+		fragmentFirst.setArguments(args);
+		return fragmentFirst;
+	}
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -40,9 +48,9 @@ public class HomeTimeLineFragment extends BaseFragment {
 				Toast.makeText(getActivity(), "No Internet Connection..No Refresh / Load", Toast.LENGTH_SHORT).show();
 			}
 		}
-
 	}
 
+	
 	@Override
 	public void onResume() {
 		super.onResume();
@@ -57,7 +65,7 @@ public class HomeTimeLineFragment extends BaseFragment {
 			});
 			setupEndlessScrolling();
 			// also refresh data
-			fetchRefreshTimelineData();
+			//fetchRefreshTimelineData();
 			initial_call_done = false;
 		}
 	}

@@ -4,15 +4,14 @@
         android:id="@+id/mi_compose"
         android:icon="@drawable/ic_compose"
         android:menuCategory="system"
-        android:onClick="composeNewTweet"
         android:showAsAction="always"
         android:title="@string/Compose"/>
     
     <item 
         android:id="@+id/mi_MyProfile"
         android:icon="@drawable/ic_userprofile"
-        android:onClick="goToUserPage"
         android:showAsAction="always"
+        android:title="My Profile"
         />
     
 </menu>

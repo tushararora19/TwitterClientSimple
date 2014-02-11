@@ -12,6 +12,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -36,9 +39,9 @@ import com.loopj.android.http.JsonHttpResponseHandler;
 
 /*
  * TO DO:
- * 1. Make user timeline also flexible enough to scroll and refresh.
- * 2. Add option for user to tweet from his timeline
- * 3. Clicking on any tweet should take to that user timeline
+ * 1. Make user timeline also flexible enough to scroll and refresh. Done
+ * 2. Add option for user to tweet from his timeline  Done
+ * 3. Clicking on any tweet should take to that user timeline Done
 Optional: When a network request goes out, user sees an indeterminate progress indicator
 Optional: User can "reply" to any tweet on their home timeline
 The user that wrote the original tweet is automatically "@" replied in compose
@@ -69,6 +72,7 @@ public class TimelineActivity extends FragmentActivity implements TabListener{
 
 		}
 		setupNavigation();
+		//setupNavigationSlider();
 
 	}
 
@@ -79,17 +83,33 @@ public class TimelineActivity extends FragmentActivity implements TabListener{
 		return true;
 	}
 
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle item selection
+		switch (item.getItemId()) {
+		case R.id.mi_compose:
+			composeNewTweet();
+			return true;
+		case R.id.mi_MyProfile:
+			goToUserPage();
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
+
 	public void setupNavigationSlider() {
 		ActionBar action_bar = getActionBar();
 		action_bar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-		ArrayList<Fragment> frags = new ArrayList<Fragment>();
-		frags.add(home_frag);
-		frags.add(mention_frag);
-		PagerAdapter pg_adap = new PagerAdapter(super.getSupportFragmentManager(), frags);
+		//ArrayList<Fragment> frags = new ArrayList<Fragment>();
+		//frags.add(home_frag);
+		//frags.add(mention_frag);
+		//PagerAdapter pg_adap = new PagerAdapter(super.getSupportFragmentManager(), frags);
 
-		//ViewPager pager = (ViewPager) findViewById(R.id.vp_container);
-		//pager.setAdapter(pg_adap);
+		//ViewPager vpPager = (ViewPager) findViewById(R.id.vpPager);
+		//MyPagerAdapter adapterViewPager = new MyPagerAdapter(getSupportFragmentManager());
+		//vpPager.setAdapter(adapterViewPager);
 	}
 
 	public void setupNavigation() { 
@@ -105,27 +125,6 @@ public class TimelineActivity extends FragmentActivity implements TabListener{
 		action_bar.selectTab(home_tab);
 
 	}
-	public void composeNewTweet(MenuItem mi_compose){
-		if (BaseFragment.isNetworkAvailable(getApplicationContext())){
-			TwitterClientapp.getRestClient().getUserTimeline(new JsonHttpResponseHandler() {
-
-				@Override
-				public void onFailure(Throwable arg0, JSONArray user) {
-					Log.d(TAG, "Failed : " + user.toString());
-				}
-
-				@Override
-				public void onSuccess(JSONArray user) {
-					Log.d(TAG, "Success : " + user.toString()); 
-					myself = User.parseJsonUserResult(user);
-					//user_adap = new UserAdapter(getApplicationContext(), myself);
-					startIntent();
-				}
-			});
-		} else {
-			Toast.makeText(getApplicationContext(), "No Internet Connection..", Toast.LENGTH_SHORT).show();
-		}
-	}
 
 	private void startIntent(){
 		Intent compose_intent = new Intent(getApplicationContext(), ComposeTweetActivity.class);
@@ -136,36 +135,19 @@ public class TimelineActivity extends FragmentActivity implements TabListener{
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		
-		android.support.v4.app.FragmentTransaction trans = manager.beginTransaction();
 
-		// this is for compose activity result
-		if (requestCode == REQ_CODE && resultCode == RESULT_OK){
-			
-			if (!mention_frag.isDetached())
-				trans.detach(mention_frag);
-			
-			if (!home_frag.isDetached())
-				trans.detach(home_frag);
-			
-			action_bar.selectTab(home_tab);
-			
-			trans.attach(home_frag);
-			trans.replace(R.id.fl_container, home_frag);
-			
-		}  // this is for user go back 
-		else if (requestCode == REQ_CODE_2 && resultCode == RESULT_OK) {
-			
-			if (!mention_frag.isDetached())
-				trans.detach(mention_frag);
-			
-			if (!home_frag.isDetached())
-				trans.detach(home_frag);
-			action_bar.selectTab(home_tab);
-			
-			trans.attach(home_frag);
-			trans.replace(R.id.fl_container, home_frag);
-		}
+		android.support.v4.app.FragmentTransaction trans = manager.beginTransaction();
+		if (!mention_frag.isDetached())
+			trans.detach(mention_frag);
+
+		if (!home_frag.isDetached())
+			trans.detach(home_frag);
+
+		action_bar.selectTab(home_tab);
+
+		trans.attach(home_frag);
+		trans.replace(R.id.fl_container, home_frag);
+
 		trans.commit();
 	}
 
@@ -201,7 +183,28 @@ public class TimelineActivity extends FragmentActivity implements TabListener{
 		trans.commit();
 	}
 
-	public void goToUserPage(MenuItem mi_userProfile) {
+	public void composeNewTweet(){
+		if (BaseFragment.isNetworkAvailable(getApplicationContext())){
+			TwitterClientapp.getRestClient().getUserTimeline(new JsonHttpResponseHandler() {
+
+				@Override
+				public void onFailure(Throwable arg0, JSONArray user) {
+					Log.d(TAG, "Failed : " + user.toString());
+				}
+
+				@Override
+				public void onSuccess(JSONArray user) {
+					Log.d(TAG, "Success : " + user.toString()); 
+					myself = User.parseJsonUserResult(user);
+					//user_adap = new UserAdapter(getApplicationContext(), myself);
+					startIntent();
+				}
+			});
+		} else {
+			Toast.makeText(getApplicationContext(), "No Internet Connection..", Toast.LENGTH_SHORT).show();
+		}
+	}
+	public void goToUserPage() {
 		if (BaseFragment.isNetworkAvailable(getApplicationContext())){
 			TwitterClientapp.getRestClient().getUserTimeline(new JsonHttpResponseHandler() {
 				@Override
@@ -219,4 +222,38 @@ public class TimelineActivity extends FragmentActivity implements TabListener{
 			});
 		}
 	}
+	
+	public static class MyPagerAdapter extends FragmentPagerAdapter {
+		private static int NUM_ITEMS = 2;
+			
+	        public MyPagerAdapter(FragmentManager fragmentManager) {
+	            super(fragmentManager);
+	        }
+	        
+	        // Returns total number of pages
+	        @Override
+	        public int getCount() {
+	            return NUM_ITEMS;
+	        }
+	 
+	        // Returns the fragment to display for that page
+	        @Override
+	        public Fragment getItem(int position) {
+	            switch (position) {
+	            case 0: // Fragment # 0 - This will show FirstFragment
+	                return HomeTimeLineFragment.newInstance(0, "HomeTimeline");
+	            case 1: // Fragment # 0 - This will show FirstFragment different title
+	                return MentionsTimeLineFragment.newInstance(1, "MentionsTimeline");
+	            default:
+	            	return null;
+	            }
+	        }
+	        
+	        // Returns the page title for the top indicator
+	        @Override
+	        public CharSequence getPageTitle(int position) {
+	        	return "Page " + position;
+	        }
+	        
+	    }
 }

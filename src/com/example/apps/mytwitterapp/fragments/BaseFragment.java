@@ -52,6 +52,7 @@ public class BaseFragment extends Fragment {
 		return activeNetworkInfo != null && activeNetworkInfo.isConnected();
 	}
 
+	
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);

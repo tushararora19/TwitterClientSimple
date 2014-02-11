@@ -31,6 +31,7 @@ public class User extends Model implements Serializable{
 	static int following_count = 0;
 	static int no_tweets = 0;
 	
+	
 	public User () {
 
 	}

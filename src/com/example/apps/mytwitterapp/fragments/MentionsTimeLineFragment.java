@@ -14,7 +14,7 @@ import com.loopj.android.http.JsonHttpResponseHandler;
 
 import eu.erikw.PullToRefreshListView.OnRefreshListener;
 
-// To CHECK: check if Tweet.parse if fine or if you need another class for mentions.
+// To CHECK: check if Tweet.parse is fine or if you need another class for mentions.
 
 public class MentionsTimeLineFragment extends BaseFragment {
 
@@ -22,6 +22,15 @@ public class MentionsTimeLineFragment extends BaseFragment {
 	private static boolean call_done = false;
 
 
+	public static HomeTimeLineFragment newInstance(int page, String title) {
+		HomeTimeLineFragment fragmentFirst = new HomeTimeLineFragment();
+		Bundle args = new Bundle();
+		args.putInt("pgNo", page);
+		args.putString("name", title);
+		fragmentFirst.setArguments(args);
+		return fragmentFirst;
+	}
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -48,7 +57,7 @@ public class MentionsTimeLineFragment extends BaseFragment {
 				}
 			});
 			setupEndlessScrolling();
-			fetchRefreshMentions();
+			//fetchRefreshMentions();
 			call_done = false;
 		}
 	}

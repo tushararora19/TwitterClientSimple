@@ -4,20 +4,16 @@
         android:id="@+id/tweet"
         android:orderInCategory="110"
         android:showAsAction="always"
-        android:title="@string/tweet"
-        android:onClick="TweetMessage"/>
-
+        android:title="@string/tweet"/>
     <item
         android:id="@+id/cancel"
         android:orderInCategory="120"
         android:showAsAction="always"
-        android:title="@string/cancel"
-        android:onClick="CancelTweet"/>
-    
+        android:title="@string/cancel"/>
     <item
         android:id="@+id/mi_charsLeft"
         android:orderInCategory="100"
         android:showAsAction="always"
-        android:title="@string/charsLeft" />
-    
+        android:title="@string/charsLeft"/>
+
 </menu>

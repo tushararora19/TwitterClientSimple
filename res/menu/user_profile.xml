@@ -6,6 +6,13 @@
         android:showAsAction="always" 
         android:icon="@drawable/ic_goback"
         android:title="GoBack"
-        android:onClick="GoBackToTimeline"
         />
+    
+	<item
+        android:id="@+id/mi_compTweet"
+        android:icon="@drawable/ic_compose"
+        android:menuCategory="system"
+        android:showAsAction="always"
+        android:title="@string/Compose"/>
+
 </menu>

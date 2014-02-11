@@ -84,8 +84,23 @@ public class ComposeTweetActivity extends Activity {
 
 		return true;
 	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    // Handle item selection
+	    switch (item.getItemId()) {
+	    case R.id.cancel:
+	    	CancelTweet();
+	    	return true;
+	    case R.id.tweet:
+	    	TweetMessage();
+	        return true;
+	    default:
+	        return super.onOptionsItemSelected(item);
+	    }
+	}
 
-	public void CancelTweet (MenuItem mi_cancel){
+	public void CancelTweet (){
 		if (!status.getText().toString().equals("")){
 
 			AlertDialog.Builder alert = new AlertDialog.Builder(this);
@@ -112,7 +127,7 @@ public class ComposeTweetActivity extends Activity {
 			finish();
 		}
 	}
-	public void TweetMessage (MenuItem mi_tweet) {
+	public void TweetMessage () {
 		if (!status.getText().toString().equals("")){
 			TwitterClientapp.getRestClient().updateTweet(status.getText().toString(), new JsonHttpResponseHandler(){
 
