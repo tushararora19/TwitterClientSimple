@@ -38,9 +38,6 @@ import com.loopj.android.http.JsonHttpResponseHandler;
 
 /*
  * TO DO:
- * 1. Timelines should refresh automatically
- * 2. User timeline refresh not working at all
- * 3. Compose should return to timeline from which it is called
 Optional: When a network request goes out, user sees an indeterminate progress indicator
 Optional: User can "reply" to any tweet on their home timeline
 The user that wrote the original tweet is automatically "@" replied in compose
@@ -126,6 +123,7 @@ public class TimelineActivity extends FragmentActivity implements TabListener{
 
 	private void startIntent(){
 		Intent compose_intent = new Intent(getApplicationContext(), ComposeTweetActivity.class);
+		compose_intent.putExtra("class", "TimlineActivity");
 		compose_intent.putExtra("userData", myself.get(0));
 		startActivityForResult(compose_intent, REQ_CODE);
 	}
@@ -146,6 +144,16 @@ public class TimelineActivity extends FragmentActivity implements TabListener{
 		trans.attach(home_frag);
 		trans.replace(R.id.fl_container, home_frag);
 
+		BaseFragment.resume_type = "home";
+		try {
+			// refresh time line
+			BaseFragment.home_frag.initial_call_done_home = true;
+			TwitterClientapp.getRestClient().first_call_home = true;
+			TwitterClientapp.getRestClient().first_call_mention = true;
+			
+		} catch (Exception e ){
+
+		}
 		trans.commit();
 	}
 
@@ -220,38 +228,38 @@ public class TimelineActivity extends FragmentActivity implements TabListener{
 			});
 		}
 	}
-	
+
 	public static class MyPagerAdapter extends FragmentPagerAdapter {
 		private static int NUM_ITEMS = 2;
-			
-	        public MyPagerAdapter(FragmentManager fragmentManager) {
-	            super(fragmentManager);
-	        }
-	        
-	        // Returns total number of pages
-	        @Override
-	        public int getCount() {
-	            return NUM_ITEMS;
-	        }
-	 
-	        // Returns the fragment to display for that page
-	        @Override
-	        public Fragment getItem(int position) {
-	            switch (position) {
-	            case 0: // Fragment # 0 - This will show FirstFragment
-	                return HomeTimeLineFragment.newInstance(0, "HomeTimeline");
-	            case 1: // Fragment # 0 - This will show FirstFragment different title
-	                return MentionsTimeLineFragment.newInstance(1, "MentionsTimeline");
-	            default:
-	            	return null;
-	            }
-	        }
-	        
-	        // Returns the page title for the top indicator
-	        @Override
-	        public CharSequence getPageTitle(int position) {
-	        	return "Page " + position;
-	        }
-	        
-	    }
+
+		public MyPagerAdapter(FragmentManager fragmentManager) {
+			super(fragmentManager);
+		}
+
+		// Returns total number of pages
+		@Override
+		public int getCount() {
+			return NUM_ITEMS;
+		}
+
+		// Returns the fragment to display for that page
+		@Override
+		public Fragment getItem(int position) {
+			switch (position) {
+			case 0: // Fragment # 0 - This will show FirstFragment
+				return HomeTimeLineFragment.newInstance(0, "HomeTimeline");
+			case 1: // Fragment # 0 - This will show FirstFragment different title
+				return MentionsTimeLineFragment.newInstance(1, "MentionsTimeline");
+			default:
+				return null;
+			}
+		}
+
+		// Returns the page title for the top indicator
+		@Override
+		public CharSequence getPageTitle(int position) {
+			return "Page " + position;
+		}
+
+	}
 }

@@ -32,6 +32,7 @@ public class ComposeTweetActivity extends Activity {
 	ImageView img_url;
 	EditText status;
 	MenuItem mi_charsLeft;
+	String called_From = "";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +41,8 @@ public class ComposeTweetActivity extends Activity {
 
 		@SuppressWarnings("unchecked")
 		Serializable user = getIntent().getSerializableExtra("userData");
-
+		called_From = getIntent().getStringExtra("class");
+		
 		user_name = (TextView) findViewById(R.id.tv_myname);
 		user_id = (TextView) findViewById(R.id.tv_myid);
 		img_url = (ImageView) findViewById(R.id.iv_myimage);
@@ -139,19 +141,44 @@ public class ComposeTweetActivity extends Activity {
 				@Override
 				public void onSuccess(JSONArray arg0) {
 					Log.d(TAG, "SUCCESS: " + arg0.toString());
-					Intent goBack_intent = new Intent (getApplicationContext(), TimelineActivity.class);
-					goBack_intent.putExtra("demo", "demoString");
-					setResult(RESULT_OK, goBack_intent);
-					finish();
+					// to be done in future.
+					//if (called_From.equals("TimlineActivity"))
+					//	goBack_intent = new Intent (getApplicationContext(), TimelineActivity.class);
+					//else if (called_From.equals("UserProfileActivity"))
+					//	goBack_intent = new Intent (getApplicationContext(), UserProfileActivity.class);
+
+					try {
+						Intent goBack_intent = new Intent (getApplicationContext(), TimelineActivity.class);
+						goBack_intent.putExtra("tweetComposed", "yes");
+						setResult(RESULT_OK, goBack_intent);
+					} catch (NullPointerException ne) {
+						
+					} catch (Exception e) {
+
+					} finally {
+						finish();
+					}					 
 				}
 
 				@Override
 				public void onSuccess(JSONObject arg0) {
-					Log.d(TAG, "SUCCESS 2: " + arg0.toString());
-					Intent goBack_intent = new Intent (getApplicationContext(), TimelineActivity.class);
-					goBack_intent.putExtra("demo", "demoString");
-					setResult(RESULT_OK, goBack_intent);
-					finish();
+					Log.d(TAG, "SUCCESS: " + arg0.toString());
+					Intent goBack_intent = null;
+					if (called_From.equals("TimlineActivity"))
+						goBack_intent = new Intent (getApplicationContext(), TimelineActivity.class);
+					else if (called_From.equals("UserProfileActivity"))
+						goBack_intent = new Intent (getApplicationContext(), UserProfileActivity.class);
+
+					try {
+						goBack_intent.putExtra("tweetComposed", "yes");
+						setResult(RESULT_OK, goBack_intent);
+					} catch (NullPointerException ne) {
+						
+					} catch (Exception e) {
+
+					} finally {
+						finish();
+					}				
 				}
 
 			});

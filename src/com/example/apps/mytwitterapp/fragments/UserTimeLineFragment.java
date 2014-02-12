@@ -61,6 +61,7 @@ public class UserTimeLineFragment extends BaseFragment {
 	@Override
 	public void onPause() {
 		BaseFragment.user_frag.initial_call_done_user = true;
+		BaseFragment.user_frag.tweet_arr_user.clear();
 		super.onPause();
 	}
 

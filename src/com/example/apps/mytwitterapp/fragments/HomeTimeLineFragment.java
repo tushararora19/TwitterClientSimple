@@ -16,7 +16,7 @@ public class HomeTimeLineFragment extends BaseFragment {
 	//	BaseFragment base_frag_home;
 	public String max_id = "" ; 
 	public String since_id = "";
-	boolean initial_call_done_home = false; // keeps track of pause and resume 
+	public boolean initial_call_done_home = false; // keeps track of pause and resume 
 
 	TweetAdapter tweet_adap_home;
 	ArrayList<Tweet> tweet_arr_home = new ArrayList<Tweet>();

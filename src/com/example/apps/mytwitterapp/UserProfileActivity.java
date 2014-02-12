@@ -57,7 +57,7 @@ public class UserProfileActivity extends FragmentActivity {
 		user_frag.setScreenId(User.getUser_id());
 
 		fetchUserData();
-		fetchUserTimeline();
+//		fetchUserTimeline();
 	}
 
 	@Override
@@ -107,28 +107,29 @@ public class UserProfileActivity extends FragmentActivity {
 	}
 
 	public void GoBackToTimeline () {
-		Intent goBack_intent = new Intent (getApplicationContext(), TimelineActivity.class);
-		goBack_intent.putExtra("demo", "demoString");
-		setResult(RESULT_OK, goBack_intent);
-		finish();
+		Intent goBack_intent1 = new Intent (getApplicationContext(), TimelineActivity.class);
+		goBack_intent1.putExtra("tweetComposed", "yes");
+		BaseFragment.resume_screen_name = "";
+		setResult(RESULT_OK, goBack_intent1);
+		finish();	
 	}
 
-	public void fetchUserTimeline(){
-		TwitterClientapp.getRestClient().getUserTimeline(new JsonHttpResponseHandler(){
-
-			@Override
-			public void onFailure(Throwable arg0, JSONArray arg1) {
-				// TODO Auto-generated method stub
-				super.onFailure(arg0, arg1);
-			}
-
-			@Override
-			public void onSuccess(int arg0, JSONArray arg1) {
-				// TODO Auto-generated method stub
-				super.onSuccess(arg0, arg1);
-			}
-		});
-	}
+//	public void fetchUserTimeline(){
+//		TwitterClientapp.getRestClient().getUserTimeline(new JsonHttpResponseHandler(){
+//
+//			@Override
+//			public void onFailure(Throwable arg0, JSONArray arg1) {
+//				// TODO Auto-generated method stub
+//				super.onFailure(arg0, arg1);
+//			}
+//
+//			@Override
+//			public void onSuccess(int arg0, JSONArray arg1) {
+//				// TODO Auto-generated method stub
+//				super.onSuccess(arg0, arg1);
+//			}
+//		});
+//	}
 
 	public void composeNewTweetMsg() { 
 		if (BaseFragment.isNetworkAvailable(getApplicationContext())){
@@ -145,6 +146,7 @@ public class UserProfileActivity extends FragmentActivity {
 					myself = User.parseJsonUserResult(user);
 					//user_adap = new UserAdapter(getApplicationContext(), myself);
 					Intent compose_intent = new Intent(getApplicationContext(), ComposeTweetActivity.class);
+					compose_intent.putExtra("class", "UserProfileActivity");
 					compose_intent.putExtra("userData", myself.get(0));
 					startActivityForResult(compose_intent, REQ_CODE);				
 				}
@@ -158,6 +160,9 @@ public class UserProfileActivity extends FragmentActivity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		
+		Intent goToTimeline_intent = new Intent(getApplicationContext(), TimelineActivity.class);
+		goToTimeline_intent.putExtra("tweetComposed", data.getStringExtra("tweetComposed").toString());
+		startActivity(goToTimeline_intent);
 	}
 
 }

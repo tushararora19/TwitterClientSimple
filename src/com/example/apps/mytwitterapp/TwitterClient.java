@@ -27,9 +27,8 @@ public class TwitterClient extends OAuthBaseClient {
 	public static final String REST_CONSUMER_KEY = "BdduaWde0rBFeXOmGOkThw";       
 	public static final String REST_CONSUMER_SECRET = "3WhLrlZhIIStxVoM4BBfekgya4joe07nE44vjkVE"; 
 	public static final String REST_CALLBACK_URL = "oauth://mytwitterapp"; // Change this (here and in manifest)
-	boolean first_call_home= true;
-	boolean first_call_mention = true;
-	boolean first_call_user= true;
+	public boolean first_call_home= true;
+	public boolean first_call_mention = true;
 
 
 	public TwitterClient(Context context) {
@@ -47,9 +46,9 @@ public class TwitterClient extends OAuthBaseClient {
 			url = getApiUrl("statuses/mentions_timeline.json") +"?count=15";
 			first_call_mention = false;
 		}
-		else if (type.equals("user") && first_call_user){
+		else if (type.equals("user")){
 			url = getApiUrl("statuses/user_timeline.json?screen_name="+Uri.encode(screen_id));
-			first_call_user = false;
+			// first_call_user = false; can't apply this to user since there are soo many users accessing same api call
 		}
 
 		client.get(url, handler);

@@ -77,6 +77,8 @@ public class BaseFragment extends Fragment {
 				(resume_type.equals("mention") && (mention_frag.initial_call_done_mention)) || 
 				(resume_type.equals("user") && (user_frag.initial_call_done_user)) ) {
 			
+			fetchTimeLine(resume_type, resume_screen_name);
+			
 			if (lv_tweetTimeline!= null){
 				lv_tweetTimeline.setOnRefreshListener(new OnRefreshListener() {
 					@Override
@@ -89,6 +91,7 @@ public class BaseFragment extends Fragment {
 				setupEndlessScrolling(resume_type, resume_screen_name);
 				// also refresh data
 				//fetchRefreshTimelineData();
+				fetchTimeLineRefresh (resume_type, resume_screen_name);
 			}
 		}
 	}
@@ -126,6 +129,7 @@ public class BaseFragment extends Fragment {
 			@Override
 			protected void handleFailureMessage(Throwable arg0, String arg1) {
 				Log.d(TAG, "FAILURE !! ");
+				Toast.makeText(getActivity(), "Twitter API calls limit exceeded. Please wait 15 mins", Toast.LENGTH_SHORT).show();
 			}
 			@Override
 			public void onSuccess(int arg0, JSONObject arg1) {
