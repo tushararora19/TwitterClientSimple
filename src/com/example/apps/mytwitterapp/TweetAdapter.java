@@ -30,7 +30,6 @@ public class TweetAdapter extends ArrayAdapter<Tweet> {
 	public static final long WEEK_IN_MILLIS = 604800000;
 	private static final String TAG = "TweetAdapter";
 	//	public static Hashtable<ImageView, String> iv_url = new Hashtable<ImageView, String>();
-	private static final int REQ_CODE_3 = 30;
 
 
 	public TweetAdapter(Context context, ArrayList<Tweet> items) {
@@ -85,7 +84,7 @@ public class TweetAdapter extends ArrayAdapter<Tweet> {
 				Log.d(TAG, "Screen name is: " + tweet.getScreen_name());
 
 				if (BaseFragment.isNetworkAvailable(getContext())){
-					TwitterClientapp.getRestClient().getSpecificUserTimeline(new JsonHttpResponseHandler() {
+					TwitterClientapp.getRestClient().getTimeline(new JsonHttpResponseHandler() {
 						@Override
 						public void onFailure(Throwable arg0, JSONArray user) {
 							Log.d(TAG, "Failed : " + user.toString());
@@ -97,7 +96,7 @@ public class TweetAdapter extends ArrayAdapter<Tweet> {
 							user_intent.putExtra("userData", User.parseJsonUserResult(user).get(0));
 							getContext().startActivity(user_intent);		
 						}
-					}, screen);
+					}, "user", screen);
 				}
 			}
 		});

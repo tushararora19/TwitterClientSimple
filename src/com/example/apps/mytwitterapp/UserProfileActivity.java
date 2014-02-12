@@ -34,6 +34,7 @@ public class UserProfileActivity extends FragmentActivity {
 	UserTimeLineFragment user_frag = new UserTimeLineFragment();
 	private static final String TAG = "UserProfileActivity";
 
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

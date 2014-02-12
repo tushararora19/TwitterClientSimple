@@ -1,7 +1,6 @@
 package com.example.apps.mytwitterapp;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -16,22 +15,16 @@ import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Select;
 import com.example.apps.mytwitterapp.fragments.BaseFragment;
-import com.example.apps.mytwitterapp.fragments.HomeTimeLineFragment;
-import com.example.apps.mytwitterapp.fragments.MentionsTimeLineFragment;
 
 @Table(name="Tweets")
 public class Tweet extends Model{
 
 	private static final int MAX_COUNT = 25;
 	private static final String TAG = "Tweet";
-	public static BaseFragment base_frag_home = null;
-	public static BaseFragment base_frag_mention = null;
-	public static BaseFragment base_frag_user = null;
-//	static Hashtable<String, String> img_name = new Hashtable<String, String>();
 
 	@Column(name="row_id", unique = true, onUniqueConflict = Column.ConflictAction.REPLACE)
 	static int row = 0;
-	
+
 	@Column(name="tweet_msg")
 	String tweet_text;
 
@@ -68,7 +61,7 @@ public class Tweet extends Model{
 	public Tweet(){
 
 	}
-	
+
 	public String getTweet_id() {
 		return tweet_id;
 	}
@@ -90,9 +83,9 @@ public class Tweet extends Model{
 	public String getTimeCreated() {
 		return time_created;
 	}
-	public static ArrayList<Tweet> parseJsonArray (JSONArray tweets, BaseFragment base){
+	public static ArrayList<Tweet> parseJsonArray (JSONArray tweets, String type){
 		ArrayList<Tweet> tweet_results = new ArrayList<Tweet>();
-		
+
 		// using bulk inserts
 		ActiveAndroid.beginTransaction();
 		try {
@@ -131,23 +124,7 @@ public class Tweet extends Model{
 					url = user_json.getString("profile_image_url");
 				}
 
-				
-				if (!base.max_id.equals("")){
-					if (tweet_id.compareToIgnoreCase(base.max_id) < 0) { // keeping track of lowest tweet id received
-						base.max_id = tweet_id;
-					}
-				} else {
-					base.max_id = tweet_id;
-				}
-
-
-				if (base.since_id.equals("")){
-					base.since_id = tweet_id;
-				} else {
-					if (tweet_id.compareToIgnoreCase(base.since_id) >= 0){
-						base.since_id = tweet_id;
-					}
-				}
+				updateMaxAndSinceId(type, tweet_id);
 
 				if (row+1 > MAX_COUNT) {
 					row = 0;
@@ -160,29 +137,70 @@ public class Tweet extends Model{
 				} catch (Exception e) {
 					Log.d(TAG, "no old element found with exc: " +e.toString());
 				}
-				
+
 				Tweet t = new Tweet(tweetText, user, user_r, screen_n, url, time, tweet_id, row+1);
 				t.save();
 				tweet_results.add(t);
 			}
-			
-			if (base instanceof HomeTimeLineFragment) 
-				base_frag_home = base;
-			else if (base instanceof MentionsTimeLineFragment)
-				base_frag_mention = base;
-			else 
-				base_frag_user = base;
-			
 			ActiveAndroid.setTransactionSuccessful();
 
 		} catch (Exception e) {
 		} finally {
 			ActiveAndroid.endTransaction();
-			
+
 		}
 		return tweet_results;
 	}
 
+	public static void updateMaxAndSinceId(String type, String tweet_id){
+		String max_id = ""; 
+		String since_id = "";
+
+		// get max and since id first
+		if (type.equals("home")){
+			max_id = BaseFragment.home_frag.max_id;
+			since_id = BaseFragment.home_frag.since_id;
+		}
+		else if (type.equals("mention")) {
+			max_id = BaseFragment.mention_frag.max_id;
+			since_id = BaseFragment.mention_frag.since_id;
+		}
+		else { 
+			max_id = BaseFragment.user_frag.max_id;
+			since_id = BaseFragment.user_frag.since_id;
+		}
+
+		// update respective max id
+		if (!max_id.equals("")){
+			if (tweet_id.compareToIgnoreCase(max_id) < 0) { // keeping track of lowest tweet id received
+				max_id = tweet_id;
+			}
+		} else {
+			max_id = tweet_id;
+		}
+		// update respective since id
+		if (since_id.equals("")){
+			since_id = tweet_id;
+		} else {
+			if (tweet_id.compareToIgnoreCase(since_id) >= 0){
+				since_id = tweet_id;
+			}
+		}
+
+		// update respective object
+		if (type.equals("home")) {
+			BaseFragment.home_frag.max_id = max_id;
+			BaseFragment.home_frag.since_id = since_id;
+		}
+		else if (type.equals("mention")) {
+			BaseFragment.mention_frag.max_id = max_id;
+			BaseFragment.mention_frag.since_id = since_id;
+		}
+		else { 
+			BaseFragment.user_frag.max_id = max_id;
+			BaseFragment.user_frag.since_id = since_id;
+		}
+	}
 	// shows only first 20 tweets
 	public static List<Tweet> offlineFromJson() {
 		return new Select()

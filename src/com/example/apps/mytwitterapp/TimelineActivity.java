@@ -14,7 +14,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -39,9 +38,9 @@ import com.loopj.android.http.JsonHttpResponseHandler;
 
 /*
  * TO DO:
- * 1. Make user timeline also flexible enough to scroll and refresh. Done
- * 2. Add option for user to tweet from his timeline  Done
- * 3. Clicking on any tweet should take to that user timeline Done
+ * 1. Timelines should refresh automatically
+ * 2. User timeline refresh not working at all
+ * 3. Compose should return to timeline from which it is called
 Optional: When a network request goes out, user sees an indeterminate progress indicator
 Optional: User can "reply" to any tweet on their home timeline
 The user that wrote the original tweet is automatically "@" replied in compose
@@ -73,7 +72,6 @@ public class TimelineActivity extends FragmentActivity implements TabListener{
 		}
 		setupNavigation();
 		//setupNavigationSlider();
-
 	}
 
 	@Override
